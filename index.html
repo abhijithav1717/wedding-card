@@ -15,7 +15,6 @@
             position: relative;
         }
 
-        /* Blur overlay for quiz */
         .quiz-backdrop {
             position: fixed;
             top: 0;
@@ -27,7 +26,6 @@
             z-index: 1;
         }
 
-        /* Quiz Container */
         .quiz-container {
             position: fixed;
             top: 0;
@@ -169,7 +167,6 @@
             margin: 20px 0;
         }
 
-        /* Wedding Card Styles */
         .wedding-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -253,6 +250,7 @@
             height: 150px;
             border-radius: 50%;
             object-fit: cover;
+            object-position: center;
             margin-bottom: 15px;
             border: 3px solid #ee9ca7;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -337,16 +335,18 @@
             .header p { font-size: 1.3em; }
             .section h2 { font-size: 2em; }
             .couple-card { width: 100%; }
+            .couple-card img {
+                width: 120px;
+                height: 120px;
+            }
             .timeline-item { width: 100%; }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Quiz Backdrop -->
     <div class="quiz-backdrop"></div>
 
-    <!-- Quiz Container -->
     <div class="quiz-container" id="quizContainer">
         <div class="quiz-card">
             <div class="quiz-header">
@@ -371,7 +371,6 @@
         </div>
     </div>
 
-    <!-- Wedding Invitation -->
     <div class="wedding-container" id="weddingContainer">
         <div class="header">
             <h1>Emma & James</h1>
@@ -494,42 +493,24 @@
         const totalSpan = document.getElementById('total');
         const weddingContainer = document.getElementById('weddingContainer');
 
-        // Check if quiz was already completed
         function checkQuizStatus() {
-            const quizCompleted = sessionStorage.getItem('weddingQuizCompleted');
-            
-            if (quizCompleted === 'true') {
-                // Skip quiz and show wedding card directly
-                showWeddingCardDirectly();
+            if (localStorage.getItem('weddingQuizCompleted') === 'true') {
+                quizContainer.style.display = 'none';
+                document.querySelector('.quiz-backdrop').style.display = 'none';
+                weddingContainer.classList.add('visible');
+                setTimeout(() => {
+                    document.querySelectorAll('.section').forEach((section, index) => {
+                        setTimeout(() => section.classList.add('visible'), index * 200);
+                    });
+                }, 300);
             } else {
-                // Show quiz normally
                 loadQuestion();
             }
-        }
-
-        function showWeddingCardDirectly() {
-            // Hide quiz and backdrop immediately
-            quizContainer.style.display = 'none';
-            document.querySelector('.quiz-backdrop').style.display = 'none';
-            
-            // Show wedding card immediately
-            weddingContainer.classList.add('visible');
-            
-            // Animate sections
-            setTimeout(() => {
-                const sections = document.querySelectorAll('.section');
-                sections.forEach((section, index) => {
-                    setTimeout(() => {
-                        section.classList.add('visible');
-                    }, index * 200);
-                });
-            }, 300);
         }
 
         function loadQuestion() {
             const question = questions[currentQuestion];
             questionText.textContent = question.question;
-            
             optionsContainer.innerHTML = '';
             question.options.forEach((option, index) => {
                 const optionDiv = document.createElement('div');
@@ -538,34 +519,21 @@
                 optionDiv.onclick = () => selectOption(index, optionDiv);
                 optionsContainer.appendChild(optionDiv);
             });
-
-            // Update progress bar
-            const progress = ((currentQuestion) / questions.length) * 100;
-            progressFill.style.width = progress + '%';
-
+            progressFill.style.width = ((currentQuestion) / questions.length) * 100 + '%';
             selectedAnswer = null;
             nextBtn.disabled = true;
         }
 
         function selectOption(index, element) {
-            // Remove selection from all options
-            document.querySelectorAll('.option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            
-            // Add selection to clicked option
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
             element.classList.add('selected');
             selectedAnswer = index;
             nextBtn.disabled = false;
         }
 
         function nextQuestion() {
-            if (selectedAnswer === questions[currentQuestion].correct) {
-                score++;
-            }
-
+            if (selectedAnswer === questions[currentQuestion].correct) score++;
             currentQuestion++;
-
             if (currentQuestion < questions.length) {
                 loadQuestion();
             } else {
@@ -574,10 +542,7 @@
         }
 
         function showResults() {
-            // Update progress to 100%
             progressFill.style.width = '100%';
-            
-            // Show final score
             questionText.textContent = "🎉 Quiz Complete! 🎉";
             optionsContainer.innerHTML = `
                 <div style="text-align: center; padding: 20px;">
@@ -589,53 +554,36 @@
                             "Excellent! You know Emma & James very well! 💕" : 
                             score >= questions.length * 0.5 ? 
                             "Good job! You're getting to know the couple! 😊" : 
-                            "Thanks for taking the quiz! Now you know more about Emma & James! 💖"
-                        }
+                            "Thanks for taking the quiz! Now you know more about Emma & James! 💖"}
                     </p>
                 </div>
             `;
-            
             nextBtn.textContent = "Open Wedding Invitation";
             nextBtn.onclick = showWeddingCard;
             nextBtn.disabled = false;
         }
 
         function showWeddingCard() {
-            // Mark quiz as completed
-            sessionStorage.setItem('weddingQuizCompleted', 'true');
-            
-            // Hide quiz with animation
+            localStorage.setItem('weddingQuizCompleted', 'true');
             quizContainer.classList.add('hidden');
-            
-            // Remove blur backdrop and show wedding card
             setTimeout(() => {
-                const backdrop = document.querySelector('.quiz-backdrop');
-                backdrop.style.opacity = '0';
+                document.querySelector('.quiz-backdrop').style.opacity = '0';
                 setTimeout(() => {
-                    backdrop.style.display = 'none';
+                    document.querySelector('.quiz-backdrop').style.display = 'none';
                     weddingContainer.classList.add('visible');
-                    
-                    // Animate sections
                     setTimeout(() => {
-                        const sections = document.querySelectorAll('.section');
-                        sections.forEach((section, index) => {
-                            setTimeout(() => {
-                                section.classList.add('visible');
-                            }, index * 300);
+                        document.querySelectorAll('.section').forEach((section, index) => {
+                            setTimeout(() => section.classList.add('visible'), index * 300);
                         });
                     }, 500);
                 }, 500);
             }, 1000);
         }
 
-        // Initialize
         nextBtn.onclick = nextQuestion;
         totalSpan.textContent = questions.length;
-        
-        // Check quiz status on page load
         checkQuizStatus();
 
-        // Add some sparkle effects
         function createSparkle() {
             const sparkle = document.createElement('div');
             sparkle.innerHTML = '✨';
@@ -647,29 +595,17 @@
             sparkle.style.animation = 'sparkleFloat 3s ease-out forwards';
             sparkle.style.zIndex = '5';
             sparkle.style.opacity = '0.7';
-            
             document.body.appendChild(sparkle);
-            
-            setTimeout(() => {
-                sparkle.remove();
-            }, 3000);
+            setTimeout(() => sparkle.remove(), 3000);
         }
 
-        // Create sparkles periodically
         setInterval(createSparkle, 2000);
 
-        // Add sparkle animation
         const sparkleStyle = document.createElement('style');
         sparkleStyle.innerHTML = `
             @keyframes sparkleFloat {
-                0% {
-                    transform: translateY(0px) rotate(0deg);
-                    opacity: 0.7;
-                }
-                100% {
-                    transform: translateY(-100px) rotate(360deg);
-                    opacity: 0;
-                }
+                0% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+                100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
             }
         `;
         document.head.appendChild(sparkleStyle);
