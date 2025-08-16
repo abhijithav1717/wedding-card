@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emma & James Wedding Quiz & Invitation</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: url('https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1470&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Blur overlay for quiz */
+        .quiz-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(10px);
+            background: rgba(107, 45, 92, 0.3);
+            z-index: 1;
+        }
+
+        /* Quiz Container */
+        .quiz-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 1;
+            transition: all 1s ease-out;
+        }
+
+        .quiz-container.hidden {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        .quiz-card {
+            background: linear-gradient(135deg, rgba(238, 156, 167, 0.95), rgba(255, 221, 225, 0.95));
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+        }
+
+        .quiz-header h1 {
+            font-size: 2.5em;
+            color: #6b2d5c;
+            margin: 0;
+            font-family: 'Great Vibes', cursive;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
+        }
+
+        .quiz-header p {
+            font-size: 1.2em;
+            color: #6b2d5c;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+
+        .question-container {
+            margin: 30px 0;
+        }
+
+        .question {
+            font-size: 1.4em;
+            color: #6b2d5c;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .option {
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #ee9ca7;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #6b2d5c;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .option:hover {
+            background: #ee9ca7;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(238, 156, 167, 0.4);
+        }
+
+        .option.selected {
+            background: #6b2d5c;
+            color: white;
+            border-color: #6b2d5c;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ee9ca7, #6b2d5c);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #6b2d5c, #ee9ca7);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .next-btn:enabled {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .next-btn:hover:enabled {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(107, 45, 92, 0.4);
+        }
+
+        .score-display {
+            font-size: 1.5em;
+            color: #6b2d5c;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        /* Wedding Card Styles */
+        .wedding-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 1s ease-out;
+            position: relative;
+            z-index: 5;
+        }
+
+        .wedding-container.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .header {
+            text-align: center;
+            padding: 60px 20px;
+            animation: fadeIn 2s ease-in;
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            color: #6b2d5c;
+            margin: 0;
+            font-family: 'Great Vibes', cursive;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
+        }
+
+        .header p {
+            font-size: 1.6em;
+            color: #fff;
+            margin: 10px 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .section {
+            padding: 60px 20px;
+            margin: 20px 0;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease-out;
+            text-align: center;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section h2 {
+            font-size: 2.5em;
+            color: #6b2d5c;
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: 'Georgia', serif;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .couple-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .couple-card {
+            text-align: center;
+            width: 300px;
+            padding: 20px;
+            transition: transform 0.5s ease;
+        }
+
+        .couple-card:hover {
+            transform: scale(1.05);
+        }
+
+        .couple-card img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 3px solid #ee9ca7;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .couple-card h3 {
+            font-size: 1.8em;
+            color: #fff;
+            margin: 10px 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .couple-card p {
+            font-size: 1.1em;
+            color: #fff;
+            line-height: 1.5;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .timeline {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .timeline-item {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            width: 250px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transform: scale(0.8);
+            transition: transform 0.5s ease;
+        }
+
+        .timeline-item:hover {
+            transform: scale(1);
+        }
+
+        .timeline-item h3 {
+            font-size: 1.5em;
+            color: #000000;
+            margin-bottom: 10px;
+        }
+
+        .timeline-item p {
+            font-size: 1.1em;
+            color: #0a0a0a;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #fff;
+            background: rgba(107, 45, 92, 0.8);
+            border-radius: 15px;
+            margin-top: 40px;
+        }
+
+        .footer p {
+            font-size: 1.2em;
+            margin: 5px 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .quiz-card {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+            
+            .quiz-header h1 { font-size: 2em; }
+            .question { font-size: 1.2em; }
+            .header h1 { font-size: 2.5em; }
+            .header p { font-size: 1.3em; }
+            .section h2 { font-size: 2em; }
+            .couple-card { width: 100%; }
+            .timeline-item { width: 100%; }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Quiz Backdrop -->
+    <div class="quiz-backdrop"></div>
+
+    <!-- Quiz Container -->
+    <div class="quiz-container" id="quizContainer">
+        <div class="quiz-card">
+            <div class="quiz-header">
+                <h1>❤️ Love Quiz ❤️</h1>
+                <p>Test your knowledge about Emma & James!</p>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="question-container" id="questionContainer">
+                <div class="question" id="questionText"></div>
+                <div class="options" id="optionsContainer"></div>
+            </div>
+            
+            <button class="next-btn" id="nextBtn" disabled>Next Question</button>
+            
+            <div class="score-display" id="scoreDisplay" style="display: none;">
+                Score: <span id="score">0</span> / <span id="total">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wedding Invitation -->
+    <div class="wedding-container" id="weddingContainer">
+        <div class="header">
+            <h1>Emma & James</h1>
+            <p>Are Tying the Knot!</p>
+            <p>Saturday, June 10, 2026 | 4:00 PM</p>
+        </div>
+
+        <div class="section" id="couple">
+            <h2>Meet the Couple</h2>
+            <div class="couple-container">
+                <div class="couple-card">
+                    <img src="image/Firefly_i want separately genarate bride only 424379.jpg" alt="Bride Emma">
+                    <h3>Emma - The Radiant Bride</h3>
+                    <p>Emma is a free-spirited artist with a heart full of dreams. Her infectious laughter and love for adventure light up every room. She's ready to paint a new chapter with James, filled with love and endless creativity!</p>
+                </div>
+                <div class="couple-card">
+                    <img src="image/Firefly_i want separately genarate groom only 652683.jpg" alt="Groom James">
+                    <h3>James - The Charming Groom</h3>
+                    <p>James is a tech-savvy romantic with a knack for making everyone smile. His calm demeanor and witty humor make him Emma's perfect match. He's ready to code a lifetime of happiness with his soulmate!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="details">
+            <h2>Wedding Details</h2>
+            <p>Venue: Sunset Gardens, 1234 Love Lane, Heartsville</p>
+            <p>Ceremony: 4:00 PM | Reception: 5:00 PM</p>
+            <p>Dress Code: Formal with a Touch of Whimsy</p>
+        </div>
+
+        <div class="section" id="timeline">
+            <h2>Event Timeline</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h3>4:00 PM</h3>
+                    <p>Wedding Ceremony</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>5:00 PM</h3>
+                    <p>Cocktail Hour</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>6:00 PM</h3>
+                    <p>Reception & Dinner</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>8:00 PM</h3>
+                    <p>Dancing & Celebration</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="rsvp">
+            <h2>RSVP</h2>
+            <p>Please let us know if you can join us by May 15, 2026.</p>
+            <p>Contact us at: emma.james.wedding@email.com</p>
+        </div>
+
+        <div class="footer">
+            <p>Let's Dance, Laugh, and Celebrate Love!</p>
+            <p>With all our love, Emma & James</p>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is Emma's passion?",
+                options: ["Art and Creativity", "Cooking", "Sports", "Music"],
+                correct: 0
+            },
+            {
+                question: "How would you describe Emma's personality?",
+                options: ["Quiet and Reserved", "Free-spirited and Adventurous", "Serious and Focused", "Shy and Introverted"],
+                correct: 1
+            },
+            {
+                question: "What is James's profession area?",
+                options: ["Medicine", "Law", "Technology", "Education"],
+                correct: 2
+            },
+            {
+                question: "What is James known for?",
+                options: ["Being serious all the time", "His witty humor and calm demeanor", "Being very loud", "Always being late"],
+                correct: 1
+            },
+            {
+                question: "When is their wedding?",
+                options: ["June 10, 2025", "June 10, 2026", "July 10, 2026", "May 10, 2026"],
+                correct: 1
+            },
+            {
+                question: "What time does the ceremony start?",
+                options: ["3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM"],
+                correct: 1
+            },
+            {
+                question: "Where is the wedding venue?",
+                options: ["Rose Gardens", "Sunset Gardens", "Spring Gardens", "Royal Gardens"],
+                correct: 1
+            },
+            {
+                question: "What's the dress code for the wedding?",
+                options: ["Casual", "Business Casual", "Black Tie", "Formal with a Touch of Whimsy"],
+                correct: 3
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+
+        const quizContainer = document.getElementById('quizContainer');
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressFill = document.getElementById('progressFill');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const scoreSpan = document.getElementById('score');
+        const totalSpan = document.getElementById('total');
+        const weddingContainer = document.getElementById('weddingContainer');
+
+        // Check if quiz was already completed
+        function checkQuizStatus() {
+            const quizCompleted = sessionStorage.getItem('weddingQuizCompleted');
+            
+            if (quizCompleted === 'true') {
+                // Skip quiz and show wedding card directly
+                showWeddingCardDirectly();
+            } else {
+                // Show quiz normally
+                loadQuestion();
+            }
+        }
+
+        function showWeddingCardDirectly() {
+            // Hide quiz and backdrop immediately
+            quizContainer.style.display = 'none';
+            document.querySelector('.quiz-backdrop').style.display = 'none';
+            
+            // Show wedding card immediately
+            weddingContainer.classList.add('visible');
+            
+            // Animate sections
+            setTimeout(() => {
+                const sections = document.querySelectorAll('.section');
+                sections.forEach((section, index) => {
+                    setTimeout(() => {
+                        section.classList.add('visible');
+                    }, index * 200);
+                });
+            }, 300);
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            questionText.textContent = question.question;
+            
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectOption(index, optionDiv);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            // Update progress bar
+            const progress = ((currentQuestion) / questions.length) * 100;
+            progressFill.style.width = progress + '%';
+
+            selectedAnswer = null;
+            nextBtn.disabled = true;
+        }
+
+        function selectOption(index, element) {
+            // Remove selection from all options
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selection to clicked option
+            element.classList.add('selected');
+            selectedAnswer = index;
+            nextBtn.disabled = false;
+        }
+
+        function nextQuestion() {
+            if (selectedAnswer === questions[currentQuestion].correct) {
+                score++;
+            }
+
+            currentQuestion++;
+
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            // Update progress to 100%
+            progressFill.style.width = '100%';
+            
+            // Show final score
+            questionText.textContent = "🎉 Quiz Complete! 🎉";
+            optionsContainer.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <p style="font-size: 1.3em; color: #6b2d5c; margin-bottom: 20px;">
+                        You scored ${score} out of ${questions.length}!
+                    </p>
+                    <p style="color: #6b2d5c; font-size: 1.1em;">
+                        ${score >= questions.length * 0.7 ? 
+                            "Excellent! You know Emma & James very well! 💕" : 
+                            score >= questions.length * 0.5 ? 
+                            "Good job! You're getting to know the couple! 😊" : 
+                            "Thanks for taking the quiz! Now you know more about Emma & James! 💖"
+                        }
+                    </p>
+                </div>
+            `;
+            
+            nextBtn.textContent = "Open Wedding Invitation";
+            nextBtn.onclick = showWeddingCard;
+            nextBtn.disabled = false;
+        }
+
+        function showWeddingCard() {
+            // Mark quiz as completed
+            sessionStorage.setItem('weddingQuizCompleted', 'true');
+            
+            // Hide quiz with animation
+            quizContainer.classList.add('hidden');
+            
+            // Remove blur backdrop and show wedding card
+            setTimeout(() => {
+                const backdrop = document.querySelector('.quiz-backdrop');
+                backdrop.style.opacity = '0';
+                setTimeout(() => {
+                    backdrop.style.display = 'none';
+                    weddingContainer.classList.add('visible');
+                    
+                    // Animate sections
+                    setTimeout(() => {
+                        const sections = document.querySelectorAll('.section');
+                        sections.forEach((section, index) => {
+                            setTimeout(() => {
+                                section.classList.add('visible');
+                            }, index * 300);
+                        });
+                    }, 500);
+                }, 500);
+            }, 1000);
+        }
+
+        // Initialize
+        nextBtn.onclick = nextQuestion;
+        totalSpan.textContent = questions.length;
+        
+        // Check quiz status on page load
+        checkQuizStatus();
+
+        // Add some sparkle effects
+        function createSparkle() {
+            const sparkle = document.createElement('div');
+            sparkle.innerHTML = '✨';
+            sparkle.style.position = 'fixed';
+            sparkle.style.left = Math.random() * window.innerWidth + 'px';
+            sparkle.style.top = Math.random() * window.innerHeight + 'px';
+            sparkle.style.fontSize = Math.random() * 20 + 10 + 'px';
+            sparkle.style.pointerEvents = 'none';
+            sparkle.style.animation = 'sparkleFloat 3s ease-out forwards';
+            sparkle.style.zIndex = '5';
+            sparkle.style.opacity = '0.7';
+            
+            document.body.appendChild(sparkle);
+            
+            setTimeout(() => {
+                sparkle.remove();
+            }, 3000);
+        }
+
+        // Create sparkles periodically
+        setInterval(createSparkle, 2000);
+
+        // Add sparkle animation
+        const sparkleStyle = document.createElement('style');
+        sparkleStyle.innerHTML = `
+            @keyframes sparkleFloat {
+                0% {
+                    transform: translateY(0px) rotate(0deg);
+                    opacity: 0.7;
+                }
+                100% {
+                    transform: translateY(-100px) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(sparkleStyle);
+    </script>
+</body>
+</html>
